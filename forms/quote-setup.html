@@ -35,7 +35,9 @@
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
-    form input, form select, form button {
+    form input,
+    form select,
+    form button {
       padding: 0.8rem;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -52,6 +54,37 @@
     form button:hover {
       background: #084298;
     }
+
+    /* Color-coded inputs */
+    input[type="text"],
+    input[type="email"] {
+      background-color: #e3f2fd; /* light blue */
+    }
+    input[type="number"] {
+      background-color: #f0f0f0; /* light grey */
+    }
+    select {
+      background-color: #ffe4e1; /* light pink */
+    }
+    input[readonly] {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Tooltip styling */
+    .tooltip {
+      font-size: 0.75rem;
+      color: #555;
+      margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
+      grid-column: span 1;
+    }
+
+    /* Make date + tooltip align nicely */
+    .full-span {
+      grid-column: span 2;
+    }
   </style>
 </head>
 <body>
@@ -62,16 +95,39 @@
     <select id="hospitalSelect" required>
       <option value="">Select Hospital</option>
     </select>
-    <input type="text" id="quoteNo" placeholder="Quote No. (auto)" readonly>
-    <input type="date" id="quoteDate" required>
-    <input type="text" id="yourReference" placeholder="Your Reference">
-    <input type="date" id="refDate" required>
+
+    <input
+      type="text"
+      id="quoteNo"
+      placeholder="Quote No. (auto)"
+      readonly
+      title="Read-only auto-generated Quote No."
+    >
+
+    <div>
+      <input type="date" id="quoteDate" required>
+      <div class="tooltip">Quotation Date</div>
+    </div>
+
+    <div>
+      <input type="date" id="refDate" required>
+      <div class="tooltip">Reference Date</div>
+    </div>
+
+    <select id="yourReference" required>
+      <option value="">Select Reference Type</option>
+      <option value="Telephonic">Telephonic</option>
+      <option value="Email">Email</option>
+    </select>
+
+    <input type="text" id="officePhone" placeholder="Office Phone">
+
     <input type="text" id="hospitalName" placeholder="Hospital / Client Name" required>
     <input type="text" id="hospitalAddress" placeholder="Hospital Address" required>
     <input type="text" id="contactPerson" placeholder="Contact Person" required>
     <input type="text" id="contactPhone" placeholder="Handphone" required>
     <input type="email" id="contactEmail" placeholder="Email" required>
-    <input type="text" id="officePhone" placeholder="Office Phone">
+
     <button type="submit">Proceed to Quote</button>
   </form>
 </div>
@@ -103,6 +159,7 @@
     if (idx === '') return;
     const hosp = hospitals[idx];
     if (!hosp) return;
+
     document.getElementById('hospitalName').value = hosp.clientName || '';
     document.getElementById('hospitalAddress').value = hosp.address || '';
     document.getElementById('contactPhone').value = hosp.mobile || '';
