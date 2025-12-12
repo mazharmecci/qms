@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QMS - Quote Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+    }
+    header {
+      background: #0d6efd;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #0d6efd;
+      margin-bottom: 1rem;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    form input, form select, form button {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    form button {
+      grid-column: span 2;
+      background: #0d6efd;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    form button:hover {
+      background: #084298;
+    }
+  </style>
+</head>
+<body>
+<header>QMS - Quote Setup</header>
+<div class="container">
+  <h2>Enter Quote Details</h2>
+  <form id="quoteSetupForm">
+    <select id="hospitalSelect" required>
+      <option value="">Select Hospital</option>
+    </select>
+    <input type="text" id="quoteNo" placeholder="Quote No. (auto)" readonly>
+    <input type="date" id="quoteDate" required>
+    <input type="text" id="yourReference" placeholder="Your Reference">
+    <input type="date" id="refDate" required>
+    <input type="text" id="hospitalName" placeholder="Hospital / Client Name" required>
+    <input type="text" id="hospitalAddress" placeholder="Hospital Address" required>
+    <input type="text" id="contactPerson" placeholder="Contact Person" required>
+    <input type="text" id="contactPhone" placeholder="Handphone" required>
+    <input type="email" id="contactEmail" placeholder="Email" required>
+    <input type="text" id="officePhone" placeholder="Office Phone">
+    <button type="submit">Proceed to Quote</button>
+  </form>
+</div>
+
+<script>
+  function generateQuoteNo() {
+    const lastNo = localStorage.getItem('lastQuoteNo') || 'EQ/SQ/25-26/00000';
+    const parts = lastNo.split('/');
+    const num = parseInt(parts[parts.length - 1], 10) + 1;
+    const newNo = `EQ/SQ/25-26/${String(num).padStart(5, '0')}`;
+    localStorage.setItem('lastQuoteNo', newNo);
+    return newNo;
+  }
+
+  function populateHospitalDropdown() {
+    const hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+    const select = document.getElementById('hospitalSelect');
+    hospitals.forEach((hosp, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = `${hosp.clientCode} - ${hosp.clientName}`;
+      select.appendChild(opt);
+    });
+  }
+
+  function fillHospitalDetails() {
+    const hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+    const idx = document.getElementById('hospitalSelect').value;
+    if (idx === '') return;
+    const hosp = hospitals[idx];
+    if (!hosp) return;
+    document.getElementById('hospitalName').value = hosp.clientName || '';
+    document.getElementById('hospitalAddress').value = hosp.address || '';
+    document.getElementById('contactPhone').value = hosp.mobile || '';
+    document.getElementById('contactEmail').value = hosp.email || '';
+  }
+
+  document.getElementById('hospitalSelect').addEventListener('change', fillHospitalDetails);
+
+  document.getElementById('quoteSetupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const headerData = {
+      quoteNo: document.getElementById('quoteNo').value,
+      quoteDate: document.getElementById('quoteDate').value,
+      yourReference: document.getElementById('yourReference').value,
+      refDate: document.getElementById('refDate').value,
+      hospitalName: document.getElementById('hospitalName').value,
+      hospitalAddress: document.getElementById('hospitalAddress').value,
+      contactPerson: document.getElementById('contactPerson').value,
+      contactPhone: document.getElementById('contactPhone').value,
+      contactEmail: document.getElementById('contactEmail').value,
+      officePhone: document.getElementById('officePhone').value
+    };
+    localStorage.setItem('quoteHeader', JSON.stringify(headerData));
+    window.location.href = 'quotes.html';
+  });
+
+  // Initialize defaults
+  document.getElementById('quoteNo').value = generateQuoteNo();
+  const todayISO = new Date().toISOString().slice(0,10);
+  document.getElementById('quoteDate').value = todayISO;
+  document.getElementById('refDate').value = todayISO;
+  populateHospitalDropdown();
+</script>
+</body>
+</html>
