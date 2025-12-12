@@ -3,13 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>QMS - Quotes</title>
+  <!-- Inter is still loaded; Aptos Display will be used if installed on the machine -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    /* Base font: Aptos Display if available, else system, else Inter */
     body {
-      font-family:'Inter',sans-serif;
+      font-family: 'Aptos Display', system-ui, 'Inter', sans-serif;
       background:#f5f7fa;
       margin:0;
     }
+
     header {
       background:#0d6efd;
       color:#fff;
@@ -18,6 +21,7 @@
       font-size:1.5rem;
       font-weight:600;
     }
+
     .container {
       max-width:1200px;
       margin:2rem auto;
@@ -27,6 +31,7 @@
       box-shadow:0 4px 12px rgba(0,0,0,0.1);
     }
 
+    /* Header block */
     .quote-header {
       margin-bottom:2rem;
       border:1px solid #ccc;
@@ -39,7 +44,7 @@
       display:flex;
       gap:2rem;
       flex-wrap:wrap;
-      align-items:center;     /* vertically center both sides */
+      align-items:center;
     }
 
     .quote-left {
@@ -52,16 +57,39 @@
       padding:0.6rem 1rem;
       border-radius:8px;
       margin-bottom:1rem;
-      font-size:0.8rem;
     }
 
+    /* 6pt ≈ 8px for company line */
     .company-box p {
-      font-size:0.75rem;
+      font-size:8px;
       line-height:1.2;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
       margin:0;
+    }
+
+    /* "To" + address: 10pt ≈ 13px */
+    .hospital-box p {
+      margin:0;
+      font-size:13px;
+      line-height:1.3;
+    }
+
+    .hospital-box span {
+      font-size:13px;
+    }
+
+    /* KIND ATTN box: light blue, black text, 10pt ≈ 13px */
+    .attn-box {
+      margin-top:7rem;
+      background:#add8e6;
+      padding:0.75rem 1rem;
+      border-radius:8px;
+      font-weight:600;
+      color:#000;
+      text-align:left;
+      font-size:13px;
     }
 
     .quote-right {
@@ -72,13 +100,14 @@
       border-radius:8px;
     }
 
+    /* SALES QUOTATION: 14pt ≈ 18px */
     .quote-right-title {
       background:#d0d4d9;
       padding:0.5rem 0.75rem;
       border-radius:6px;
       text-align:right;
       font-weight:700;
-      font-size:1rem;
+      font-size:18px;
       margin-bottom:0;
       letter-spacing:0.05em;
     }
@@ -88,19 +117,29 @@
       grid-template-columns:1fr 1fr;
       gap:0.5rem 1rem;
       align-items:center;
+      margin-top:0.75rem;
     }
 
+    /* Labels: 7pt ≈ 9px */
     .quote-meta-grid .label {
-      font-size:0.8rem;
+      font-size:9px;
       font-weight:600;
       color:#222;
     }
 
+    /* Values: default 12pt ≈ 16px */
     .quote-meta-grid .value {
-      font-size:0.8rem;
+      font-size:16px;
+      font-weight:700;
       color:#000;
       text-align:left;
       white-space:nowrap;
+    }
+
+    /* Values that must be 10pt ≈ 13px */
+    .quote-meta-grid .value-small {
+      font-size:13px;
+      font-weight:700;
     }
 
     /* Quote Builder */
@@ -132,23 +171,13 @@
     table.quote-table td:last-child {
       text-align:right;
     }
-
-    .attn-box {
-      margin-top:7rem;
-      background:#add8e6;   /* light blue */
-      padding:0.75rem 1rem;
-      border-radius:8px;
-      font-weight:600;
-      color:#000000;        /* black text */
-      text-align:left;
-    }
   </style>
 </head>
 <body>
 <header>QMS - Quotes</header>
 
 <div class="container">
-  <!-- Refactored QUOTE HEADER BLOCK -->
+  <!-- QUOTE HEADER BLOCK -->
   <div class="quote-header">
     <div class="quote-header-body">
       <!-- LEFT SIDE -->
@@ -157,7 +186,8 @@
           <p><strong>ISTOS Medical Pvt Ltd.</strong> #51/5, 2nd Cross, J.C. Ind Area, Bikasipura Main Road, Yelachenahalli, Bangalore - 560062</p>
         </div>
         <div class="hospital-box">
-          <p><strong>To:</strong><br>
+          <p>
+            <strong>To:</strong><br>
             <span id="toHospitalNameLine"></span><br>
             <span id="toHospitalAddressLine1"></span><br>
             <span id="toHospitalAddressLine2"></span>
@@ -172,20 +202,35 @@
       <div class="quote-right">
         <div class="quote-right-title">SALES QUOTATION</div>
         <div class="quote-meta-grid">
-          <div class="label">Quote No.</div><div class="value" id="metaQuoteNo"></div>
-          <div class="label">Quotation Date</div><div class="value" id="metaQuoteDate"></div>
-          <div class="label">Your Reference</div><div class="value" id="metaYourRef"></div>
-          <div class="label">Ref Date</div><div class="value" id="metaRefDate"></div>
-          <div class="label">Your Contact Person</div><div class="value" id="metaContactPerson"></div>
-          <div class="label">Handphone</div><div class="value" id="metaPhone"></div>
-          <div class="label">Email</div><div class="value" id="metaEmail"></div>
-          <div class="label">Office</div><div class="value" id="metaOffice"></div>
+          <div class="label">Quote No.</div>
+          <div class="value" id="metaQuoteNo"></div> <!-- 12pt -->
+
+          <div class="label">Quotation Date</div>
+          <div class="value value-small" id="metaQuoteDate"></div> <!-- 10pt -->
+
+          <div class="label">Your Reference</div>
+          <div class="value value-small" id="metaYourRef"></div> <!-- 10pt -->
+
+          <div class="label">Ref Date</div>
+          <div class="value value-small" id="metaRefDate"></div> <!-- 10pt -->
+
+          <div class="label">Your Contact Person</div>
+          <div class="value value-small" id="metaContactPerson"></div> <!-- 10pt -->
+
+          <div class="label">Handphone</div>
+          <div class="value value-small" id="metaPhone"></div> <!-- 10pt -->
+
+          <div class="label">Email</div>
+          <div class="value value-small" id="metaEmail"></div> <!-- 10pt -->
+
+          <div class="label">Office</div>
+          <div class="value value-small" id="metaOffice"></div> <!-- 10pt -->
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Quote Builder -->
+  <!-- QUOTE BUILDER -->
   <div id="quoteBuilder">
     <h3 style="color:#0d6efd; margin-bottom:1rem;">Quote Builder</h3>
 
@@ -204,8 +249,12 @@
       <input type="text" id="freight" value="Included">
     </div>
 
-    <button onclick="generateQuote()" style="background:#0d6efd; color:#fff; padding:0.6rem 1rem; border:none; border-radius:8px;">Generate Quote Summary</button>
-    <button onclick="saveQuote()" style="margin-left:0.5rem; background:#198754; color:#fff; padding:0.6rem 1rem; border:none; border-radius:8px;">Save Quote</button>
+    <button onclick="generateQuote()" style="background:#0d6efd; color:#fff; padding:0.6rem 1rem; border:none; border-radius:8px;">
+      Generate Quote Summary
+    </button>
+    <button onclick="saveQuote()" style="margin-left:0.5rem; background:#198754; color:#fff; padding:0.6rem 1rem; border:none; border-radius:8px;">
+      Save Quote
+    </button>
 
     <div id="quoteSummary" style="margin-top:1.5rem;"></div>
   </div>
@@ -214,7 +263,7 @@
 <script>
   function formatISOToDMY(iso) {
     if (!iso) return '';
-    const [y,m,d] = iso.split('-');
+    const [y, m, d] = iso.split('-');
     return `${d}-${m}-${y}`;
   }
 
@@ -226,10 +275,10 @@
     const line1 = parts.slice(0, -1).join(',').trim();
     return [line1, line2];
   }
-  
+
   function populateHeader() {
     const header = JSON.parse(localStorage.getItem('quoteHeader') || '{}');
-  
+
     document.getElementById('metaQuoteNo').textContent = header.quoteNo || '';
     document.getElementById('metaQuoteDate').textContent = formatISOToDMY(header.quoteDate);
     document.getElementById('metaYourRef').textContent = header.yourReference || '';
@@ -238,17 +287,15 @@
     document.getElementById('metaPhone').textContent = header.contactPhone || '';
     document.getElementById('metaEmail').textContent = header.contactEmail || '';
     document.getElementById('metaOffice').textContent = header.officePhone || '';
-  
-    // Name on its own line
+
     document.getElementById('toHospitalNameLine').textContent =
       header.hospitalName || 'Hospital / Client Name';
-  
-    // Address split into 2 lines
+
     const fullAddress = header.hospitalAddress || '';
     const [line1, line2] = splitAddress(fullAddress);
     document.getElementById('toHospitalAddressLine1').textContent = line1 || '';
     document.getElementById('toHospitalAddressLine2').textContent = line2 || '';
-  
+
     document.getElementById('toAttn').textContent = header.kindAttn || 'Attention';
   }
 
@@ -283,7 +330,6 @@
       const inst = instruments[idx];
       if (!inst) return;
 
-      // main instrument
       itemsTotal += inst.price || 0;
       lineItems.push({
         type: 'Instrument',
@@ -292,7 +338,6 @@
         price: inst.price || 0
       });
 
-      // optional items
       if (inst.optionalItems) {
         inst.optionalItems.forEach(item => {
           const raw = parseFloat((item.price || '').replace(/[^\d]/g, '')) || 0;
@@ -306,7 +351,6 @@
         });
       }
 
-      // configuration items
       if (inst.configurationItems) {
         inst.configurationItems.forEach(item => {
           const raw = parseFloat((item.price || '').replace(/[^\d]/g, '')) || 0;
@@ -324,7 +368,7 @@
     const discount = parseFloat(document.getElementById('discount').value) || 0;
     const afterDiscount = itemsTotal - discount;
     const gstPercent = 18;
-    const gstAmount = afterDiscount * gstPercent / 100;
+    const gstAmount = (afterDiscount * gstPercent) / 100;
     const totalValue = afterDiscount + gstAmount;
     const roundOff = Math.round(totalValue);
 
@@ -341,6 +385,7 @@
         </thead>
         <tbody>
     `;
+
     lineItems.forEach(li => {
       const isInstrument = li.type === 'Instrument';
       lineItemsHTML += `
@@ -351,6 +396,7 @@
           <td style="text-align:right;">₹ ${Number(li.price || 0).toLocaleString('en-IN')}</td>
         </tr>`;
     });
+
     lineItemsHTML += '</tbody></table>';
 
     const summaryHTML = `
@@ -371,7 +417,6 @@
 
     document.getElementById('quoteSummary').innerHTML = lineItemsHTML + summaryHTML;
 
-    // store last quote in memory if needed
     window.lastGeneratedQuote = {
       lineItems,
       summary: {
