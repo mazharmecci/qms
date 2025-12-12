@@ -151,6 +151,7 @@
     
     .quote-meta-grid .label {
       font-size: 0.8rem;
+      font-weight: 600;
       color: #222;
     }
     
@@ -282,7 +283,7 @@
   <div class="quote-header">
     <div class="quote-header-top">
       <div class="logo-box">
-        <img src="../images/logo.png" alt="ISTOS Logo">
+        <img src="..images/logo.png" alt="ISTOS Logo">
       </div>
     </div>
   
@@ -303,35 +304,34 @@
       </div>
   
     <!-- RIGHT SIDE -->
-    <div class="quote-right">
-      <div class="quote-right-title">SALES QUOTATION</div>
-    
-      <div class="quote-meta-grid">
-        <div class="label">Quote No.</div>
-        <div class="value" id="metaQuoteNo">EQ/SQ/25-26/00001</div>
-    
-        <div class="label">Quotation Date</div>
-        <div class="value" id="metaQuoteDate">12-12-2025</div>
-    
-        <div class="label">Your Reference</div>
-        <div class="value" id="metaYourRef">Telephonic</div>
-    
-        <div class="label">Ref Date</div>
-        <div class="value" id="metaRefDate">12-12-2025</div>
-    
-        <div class="label">Your Contact Person</div>
-        <div class="value" id="metaContactPerson">Mazhar Mecci</div>
-    
-        <div class="label">Handphone</div>
-        <div class="value" id="metaPhone">+91 99001 98668</div>
-    
-        <div class="label">Email</div>
-        <div class="value" id="metaEmail">xxxxxxxxxx@gmail.com</div>
-    
-        <div class="label">Office</div>
-        <div class="value" id="metaOffice">+91 80 2686 0607</div>
+      <div class="quote-right">
+        <div class="quote-right-title">SALES QUOTATION</div>
+        <div class="quote-meta-grid">
+          <div class="label">Quote No.</div>
+          <div class="value" id="metaQuoteNo">EQ/SQ/25-26/00001</div>
+      
+          <div class="label">Quotation Date</div>
+          <div class="value" id="metaQuoteDate">12-12-2025</div>
+      
+          <div class="label">Your Reference</div>
+          <div class="value" id="metaYourRef">Telephonic</div>
+      
+          <div class="label">Ref Date</div>
+          <div class="value" id="metaRefDate">12-12-2025</div>
+      
+          <div class="label">Your Contact Person</div>
+          <div class="value" id="metaContactPerson">Mazhar Mecci</div>
+      
+          <div class="label">Handphone</div>
+          <div class="value" id="metaPhone">+91 99001 98668</div>
+      
+          <div class="label">Email</div>
+          <div class="value" id="metaEmail">xxxxxxxxxx@gmail.com</div>
+      
+          <div class="label">Office</div>
+          <div class="value" id="metaOffice">+91 80 2686 0607</div>
+        </div>
       </div>
-    </div>
   
     <!-- FORM FIELDS -->
     <div class="quote-meta-fields">
@@ -402,40 +402,39 @@
   }
 
   function syncHeaderDisplay() {
-    const qNo = document.getElementById('quoteNo').value || '';
-    const qDateISO = document.getElementById('quoteDate').value || '';
-    const rDateISO = document.getElementById('refDate').value || '';
-    const hospName = document.getElementById('hospitalName').value || '';
-    const hospAddr = document.getElementById('hospitalAddress').value || '';
-    const contact = document.getElementById('contactPerson').value || '';
-    const phone = document.getElementById('contactPhone').value || '';
-    const email = document.getElementById('contactEmail').value || '';
-
-    document.getElementById('metaQuoteNo').textContent = qNo || 'EQ/SQ/25-26/00001';
-    document.getElementById('metaQuoteDate').textContent = formatISOToDMY(qDateISO);
-    document.getElementById('metaRefDate').textContent = formatISOToDMY(rDateISO);
-
-    document.getElementById('toHospitalName').textContent = hospName || 'Hospital / Client Name';
-    document.getElementById('toHospitalAddress').textContent = hospAddr || 'Hospital Address';
-    document.getElementById('toAttn').textContent = contact || 'Contact Person';
-
-    document.getElementById('metaContactPerson').textContent = contact || 'Contact Person';
-    document.getElementById('metaPhone').textContent = phone || 'Phone';
-    document.getElementById('metaEmail').textContent = email || 'Email';
+    const getValue = id => document.getElementById(id)?.value?.trim() || '';
+  
+    const fields = {
+      metaQuoteNo: getValue('quoteNo') || 'EQ/SQ/25-26/00001',
+      metaQuoteDate: formatISOToDMY(getValue('quoteDate')),
+      metaRefDate: formatISOToDMY(getValue('refDate')),
+      metaYourRef: getValue('yourReference') || 'Telephonic',
+      metaContactPerson: getValue('contactPerson') || 'Contact Person',
+      metaPhone: getValue('contactPhone') || '+91 99001 98668',
+      metaEmail: getValue('contactEmail') || 'xxxxxxxxxx@gmail.com',
+      metaOffice: getValue('officePhone') || '+91 80 2686 0607',
+      toHospitalName: getValue('hospitalName') || 'Hospital / Client Name',
+      toHospitalAddress: getValue('hospitalAddress') || 'Hospital Address',
+      toAttn: getValue('contactPerson') || 'Contact Person'
+    };
+  
+    Object.entries(fields).forEach(([id, value]) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    });
   }
-
   function initHeaderDefaults() {
-    const quoteNoInput = document.getElementById('quoteNo');
-    if (!quoteNoInput.value) quoteNoInput.value = generateQuoteNo();
-
-    const todayISO = new Date().toISOString().slice(0,10);
-    if (!document.getElementById('quoteDate').value) {
-      document.getElementById('quoteDate').value = todayISO;
-    }
-    if (!document.getElementById('refDate').value) {
-      document.getElementById('refDate').value = todayISO;
-    }
-
+    const setIfEmpty = (id, value) => {
+      const el = document.getElementById(id);
+      if (el && !el.value) el.value = value;
+    };
+  
+    setIfEmpty('quoteNo', generateQuoteNo());
+  
+    const todayISO = new Date().toISOString().slice(0, 10);
+    setIfEmpty('quoteDate', todayISO);
+    setIfEmpty('refDate', todayISO);
+  
     syncHeaderDisplay();
   }
 
