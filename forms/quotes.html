@@ -134,13 +134,13 @@
     }
 
     .attn-box {
-      margin-top:4rem;
-      background:#d0d4d9;
+      margin-top:7rem;
+      background:#add8e6;   /* light blue */
       padding:0.75rem 1rem;
       border-radius:8px;
       font-weight:600;
-      color:#0d6efd;
-      text-align:right;
+      color:#000000;        /* black text */
+      text-align:left;
     }
   </style>
 </head>
@@ -158,6 +158,7 @@
         </div>
         <div class="hospital-box">
           <p><strong>To:</strong><br>
+            <span id="toHospitalNameLine"></span><br>
             <span id="toHospitalAddressLine1"></span><br>
             <span id="toHospitalAddressLine2"></span>
           </p>
@@ -225,10 +226,10 @@
     const line1 = parts.slice(0, -1).join(',').trim();
     return [line1, line2];
   }
-
+  
   function populateHeader() {
     const header = JSON.parse(localStorage.getItem('quoteHeader') || '{}');
-
+  
     document.getElementById('metaQuoteNo').textContent = header.quoteNo || '';
     document.getElementById('metaQuoteDate').textContent = formatISOToDMY(header.quoteDate);
     document.getElementById('metaYourRef').textContent = header.yourReference || '';
@@ -237,12 +238,17 @@
     document.getElementById('metaPhone').textContent = header.contactPhone || '';
     document.getElementById('metaEmail').textContent = header.contactEmail || '';
     document.getElementById('metaOffice').textContent = header.officePhone || '';
-
+  
+    // Name on its own line
+    document.getElementById('toHospitalNameLine').textContent =
+      header.hospitalName || 'Hospital / Client Name';
+  
+    // Address split into 2 lines
     const fullAddress = header.hospitalAddress || '';
     const [line1, line2] = splitAddress(fullAddress);
-    document.getElementById('toHospitalAddressLine1').textContent = line1 || 'Hospital / Client Name';
+    document.getElementById('toHospitalAddressLine1').textContent = line1 || '';
     document.getElementById('toHospitalAddressLine2').textContent = line2 || '';
-
+  
     document.getElementById('toAttn').textContent = header.kindAttn || 'Attention';
   }
 
