@@ -85,6 +85,17 @@
     .full-span {
       grid-column: span 2;
     }
+
+    .kind-attn-box {
+      grid-column: span 2;
+      background-color: #e0f0ff;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #0d6efd;
+      margin-top: 1rem;
+    }
+
   </style>
 </head>
 <body>
@@ -122,7 +133,7 @@
 
     <input type="text" id="hospitalName" placeholder="Hospital / Client Name" readonly required>
     <input type="text" id="hospitalAddress" placeholder="Hospital Address" readonly required>
-    <input type="text" id="kindAttn" placeholder="Kind Attention" required>
+    <div class="kind-attn-box">KIND ATTN: <input type="text" id="kindAttn" placeholder="Kind Attention" required style="background:transparent; border:none; font-weight:600; color:#0d6efd; width:80%;"></div>
     <input type="text" id="contactPerson" placeholder="Contact Person" required>
     <input type="text" id="contactPhone" placeholder="Handphone" required>
     <input type="text" id="officePhone" placeholder="Officephone" required>
@@ -177,6 +188,7 @@
       refDate: document.getElementById('refDate').value,
       hospitalName: document.getElementById('hospitalName').value,
       hospitalAddress: document.getElementById('hospitalAddress').value,
+      kindAttn: document.getElementById('kindAttn').value,
       contactPerson: document.getElementById('contactPerson').value,
       contactPhone: document.getElementById('contactPhone').value,
       contactEmail: document.getElementById('contactEmail').value,
