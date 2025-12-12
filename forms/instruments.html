@@ -114,19 +114,43 @@
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0 8px; /* 1-line style gap between rows */
       margin-top: 1rem;
     }
-    table th,
-    table td {
+
+    table thead th {
       padding: 0.8rem;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      vertical-align: top;
-    }
-    table th {
       background: #f0f4f8;
       color: #333;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table tbody tr {
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    table td {
+      padding: 0.8rem;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+
+    table tbody tr td:first-child {
+      border-left: 1px solid #eee;
+      border-radius: 8px 0 0 8px;
+    }
+
+    table tbody tr td:last-child {
+      border-right: 1px solid #eee;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .actions {
+      white-space: nowrap;
     }
 
     .actions button {
@@ -159,10 +183,29 @@
       color: white;
       cursor: pointer;
     }
+
+    .collapse-toggle {
+      cursor: pointer;
+      color: #0d6efd;
+      font-weight: 600;
+      font-size: 0.9rem;
+      user-select: none;
+      margin-bottom: 0.25rem;
+    }
+    .details-content {
+      display: none;
+      font-size: 0.9rem;
+    }
+
+    .price-cell {
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
-  <!-- Single header with Back button -->
+  <!-- Header with Back button -->
   <header>
     <div class="header-inner">
       <button type="button" class="back-btn" onclick="goBack()">
@@ -180,11 +223,13 @@
 
     <form id="instrumentForm">
       <input type="text" id="description" placeholder="Instrument Description" required>
+
       <div id="detailsEditor"></div>
 
       <input type="text" id="origin" placeholder="Country Of Origin">
       <input type="text" id="catalog" placeholder="Catalog Reference">
-      <input type="text" id="hsn" placeholder="HSN Code">
+
+      <input type="text" id="hsn" placeholder="HSN Code (1234 5678)" maxlength="9">
 
       <select id="additional">
         <option value="">Includes Additional Item?</option>
@@ -198,7 +243,8 @@
         <option value="No">No</option>
       </select>
 
-      <input type="number" id="price" placeholder="Basic Price">
+      <input type="text" id="price" placeholder="Basic Price">
+
       <input type="text" id="gstType" placeholder="GST Type">
       <input type="number" id="gstPercent" placeholder="GST %">
 
@@ -237,6 +283,8 @@
     const form = document.getElementById('instrumentForm');
     const tableBody = document.querySelector('#instrumentTable tbody');
     const pageInfo = document.getElementById('pageInfo');
+    const hsnInput = document.getElementById('hsn');
+    const priceInput = document.getElementById('price');
 
     let instruments = [];
     let currentPage = 1;
@@ -257,8 +305,42 @@
       }
     });
 
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        // Optional fallback
+        // window.location.href = 'index.html';
+      }
+    }
+
     function toggleForm() {
       form.classList.toggle('active');
+    }
+
+    // HSN: allow digits only, format as 1234 5678
+    hsnInput.addEventListener('input', () => {
+      let digits = hsnInput.value.replace(/\D/g, '').slice(0, 8); // max 8 digits
+      if (digits.length > 4) {
+        digits = digits.slice(0, 4) + ' ' + digits.slice(4);
+      }
+      hsnInput.value = digits;
+    });
+
+    // Price: live formatting with ₹ and commas
+    priceInput.addEventListener('input', () => {
+      let digits = priceInput.value.replace(/[^\d]/g, '');
+      if (!digits) {
+        priceInput.value = '';
+        return;
+      }
+      const num = parseInt(digits, 10);
+      priceInput.value = '₹ ' + num.toLocaleString('en-IN');
+    });
+
+    function parsePriceValue(displayValue) {
+      const digits = (displayValue || '').replace(/[^\d]/g, '');
+      return digits ? parseInt(digits, 10) : 0;
     }
 
     form.addEventListener('submit', function(e) {
@@ -269,10 +351,10 @@
         details: quill.root.innerHTML,
         origin: document.getElementById('origin').value,
         catalog: document.getElementById('catalog').value,
-        hsn: document.getElementById('hsn').value,
+        hsn: hsnInput.value,
         additional: document.getElementById('additional').value,
         configuration: document.getElementById('configuration').value,
-        price: document.getElementById('price').value,
+        price: parsePriceValue(priceInput.value),
         gstType: document.getElementById('gstType').value,
         gstPercent: document.getElementById('gstPercent').value
       };
@@ -290,6 +372,10 @@
       renderTable();
     });
 
+    function formatPriceDisplay(value) {
+      return '₹ ' + Number(value || 0).toLocaleString('en-IN');
+    }
+
     function renderTable() {
       tableBody.innerHTML = '';
 
@@ -301,13 +387,18 @@
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${inst.description}</td>
-          <td class="details-cell"></td>
+          <td>
+            <div class="collapse-toggle" onclick="toggleDetails(this)">
+              Details
+            </div>
+            <div class="details-content">${inst.details}</div>
+          </td>
           <td>${inst.origin}</td>
           <td>${inst.catalog}</td>
           <td>${inst.hsn}</td>
           <td>${inst.additional}</td>
           <td>${inst.configuration}</td>
-          <td>${inst.price}</td>
+          <td class="price-cell">${formatPriceDisplay(inst.price)}</td>
           <td>${inst.gstType}</td>
           <td>${inst.gstPercent}</td>
           <td class="actions">
@@ -315,7 +406,6 @@
             <button class="delete-btn" onclick="deleteInstrument(${start + index})">Delete</button>
           </td>
         `;
-        row.querySelector('.details-cell').innerHTML = inst.details;
         tableBody.appendChild(row);
       });
 
@@ -323,18 +413,11 @@
         `Page ${currentPage} of ${Math.ceil(instruments.length / pageSize) || 1}`;
     }
 
-    function nextPage() {
-      if (currentPage * pageSize < instruments.length) {
-        currentPage++;
-        renderTable();
-      }
-    }
-
-    function prevPage() {
-      if (currentPage > 1) {
-        currentPage--;
-        renderTable();
-      }
+    function toggleDetails(toggleEl) {
+      const details = toggleEl.nextElementSibling;
+      const isVisible = details.style.display === 'block';
+      details.style.display = isVisible ? 'none' : 'block';
+      toggleEl.textContent = isVisible ? 'Details' : 'Hide details';
     }
 
     function editInstrument(index) {
@@ -343,14 +426,13 @@
       document.getElementById('description').value = inst.description;
       document.getElementById('origin').value = inst.origin;
       document.getElementById('catalog').value = inst.catalog;
-      document.getElementById('hsn').value = inst.hsn;
+      hsnInput.value = inst.hsn;
       document.getElementById('additional').value = inst.additional;
       document.getElementById('configuration').value = inst.configuration;
-      document.getElementById('price').value = inst.price;
+      priceInput.value = formatPriceDisplay(inst.price);
       document.getElementById('gstType').value = inst.gstType;
       document.getElementById('gstPercent').value = inst.gstPercent;
 
-      // Load Quill content back into editor
       quill.root.innerHTML = inst.details;
 
       editIndex = index;
@@ -368,12 +450,17 @@
       renderTable();
     }
 
-    function goBack() {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        // Optional: fallback
-        // window.location.href = 'index.html';
+    function nextPage() {
+      if (currentPage * pageSize < instruments.length) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
       }
     }
 
