@@ -31,8 +31,17 @@
 </header>
 
 <div class="container">
+  <!-- Quote Header -->
   <div id="quoteHeader">
     <h3 style="color:#0d6efd; margin-bottom:1rem;">Quote Header</h3>
+
+    <div style="margin-bottom:1rem;">
+      <label><strong>Select Hospital / Client:</strong></label>
+      <select id="hospitalSelect" onchange="populateHospitalDetails()" style="margin-left:0.5rem; padding:0.4rem 0.6rem; border-radius:6px; border:1px solid #ccc;">
+        <option value="">Select Hospital</option>
+      </select>
+    </div>
+
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
       <input type="text" id="quoteNo" placeholder="Quote No. (e.g. EQ/SQ/25-26/00001)">
       <input type="date" id="quoteDate">
@@ -45,6 +54,7 @@
     </div>
   </div>
 
+  <!-- Quote Builder -->
   <div id="quoteBuilder">
     <h3 style="color:#0d6efd; margin-bottom:1rem;">Quote Builder</h3>
 
@@ -72,7 +82,8 @@
 </div>
 
 <script>
-  let instruments = JSON.parse(localStorage.getItem('instruments') || '[]'); // from instruments.html[web:23]
+  let instruments = JSON.parse(localStorage.getItem('instruments') || '[]');
+  // hospitals stored separately in hospitals.html as `hospitals` array
   function goBack(){ if(window.history.length>1) window.history.back(); }
 
   function generateQuoteNo() {
@@ -90,6 +101,31 @@
     const today = new Date().toISOString().slice(0,10);
     if (!document.getElementById('quoteDate').value) document.getElementById('quoteDate').value = today;
     if (!document.getElementById('refDate').value) document.getElementById('refDate').value = today;
+  }
+
+  function populateHospitalDropdown() {
+    const hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+    const select = document.getElementById('hospitalSelect');
+    select.innerHTML = '<option value=\"\">Select Hospital</option>';
+    hospitals.forEach((hosp, idx) => {
+      const opt = document.createElement('option');
+      opt.value = idx;
+      opt.textContent = `${hosp.clientCode} - ${hosp.clientName}`;
+      select.appendChild(opt);
+    });
+  }
+
+  function populateHospitalDetails() {
+    const hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+    const idx = document.getElementById('hospitalSelect').value;
+    if (idx === '') return;
+    const hosp = hospitals[idx];
+    if (!hosp) return;
+    document.getElementById('hospitalName').value = hosp.clientName || '';
+    document.getElementById('hospitalAddress').value = hosp.address || '';
+    document.getElementById('contactPerson').value = '';
+    document.getElementById('contactPhone').value = hosp.mobile || '';
+    document.getElementById('contactEmail').value = hosp.email || '';
   }
 
   function renderInstrumentSelection(){
@@ -118,7 +154,12 @@
     selected.forEach(idx=>{
       const inst=instruments[idx];
       itemsTotal += inst.price || 0;
-      lineItems.push({ type: 'Instrument', name: String(inst.description||'').replace(/<br>/g,' '), code: inst.catalog||'', price: inst.price||0 });
+      lineItems.push({
+        type: 'Instrument',
+        name: String(inst.description||'').replace(/<br>/g,' '),
+        code: inst.catalog || '',
+        price: inst.price || 0
+      });
 
       if(inst.optionalItems){
         inst.optionalItems.forEach(item=>{
@@ -154,7 +195,6 @@
       contactEmail:document.getElementById('contactEmail').value
     };
 
-    // Build styled header
     const headerHTML = `
       <div style="margin-bottom:1rem; padding:1rem; background:#fff; border:1px solid #ccc; border-radius:8px;">
         <h4 style="margin-bottom:0.5rem;">Sales Quotation</h4>
@@ -169,7 +209,6 @@
       </div>
     `;
 
-    // Line‑item breakdown
     let lineItemsHTML=`
       <h4>Line‑Item Breakdown</h4>
       <table class="quote-table">
@@ -212,6 +251,23 @@
     `;
 
     document.getElementById('quoteSummary').innerHTML = headerHTML + lineItemsHTML + summaryHTML;
+
+    // Also keep a structured object for possible reuse if needed later
+    window.lastGeneratedQuote = {
+      header,
+      lineItems,
+      summary: {
+        itemsTotal,
+        discount,
+        afterDiscount,
+        freight: document.getElementById('freight').value,
+        gstPercent,
+        gstAmount,
+        totalValue,
+        roundOff
+      },
+      createdAt: new Date().toISOString()
+    };
   }
 
   function saveQuote() {
@@ -288,13 +344,15 @@
     const quote = { header, lineItems, summary, createdAt: new Date().toISOString() };
     const quotes = JSON.parse(localStorage.getItem('quotes') || '[]');
     quotes.push(quote);
-    localStorage.setItem('quotes', JSON.stringify(quotes)); // persist full quote object[web:22][web:25]
+    localStorage.setItem('quotes', JSON.stringify(quotes));
 
     alert('Quote saved successfully.');
   }
 
+  // Init
   initHeaderDefaults();
   renderInstrumentSelection();
+  populateHospitalDropdown();
 </script>
 </body>
 </html>
