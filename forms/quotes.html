@@ -5,7 +5,7 @@
   <title>QMS - Quotes</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    /* Base font: Aptos Display if present, else system, else Inter */
+    /* Base font: Aptos Display if present, else system, else Inter [web:108] */
     body {
       font-family: 'Aptos Display', system-ui, 'Inter', sans-serif;
       background:#f5f7fa;
@@ -15,9 +15,9 @@
     header {
       background:#0d6efd;
       color:#fff;
-      padding:0.85rem 1.0rem;
+      padding:0.85rem 1rem;
       text-align:right;
-      font-size:1.0rem;
+      font-size:1rem;
       font-weight:600;
     }
 
@@ -32,18 +32,18 @@
 
     /* Header block */
     .quote-header {
-      margin-bottom:4;
+      margin-bottom:1.5rem;          /* fixed: was '4' with no unit */
       border:1px solid #ccc;
       border-radius:8px;
       background:#fff;
-      padding:2.0rem;
+      padding:2rem;
     }
 
     .quote-header-body {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: flex-start; /* aligns top edges */
+      display:flex;
+      gap:1rem;
+      flex-wrap:wrap;
+      align-items:flex-start;
     }
 
     .quote-left {
@@ -70,14 +70,14 @@
       margin:0;
     }
 
-     /* SALES QUOTATION: 14pt ≈ 18px */
-  .quote-right-title {
-     background:#d0d4d9;
-     text-align:right;
-     padding:0.2rem 1rem;
-     border-radius:4px;
-     margin-bottom:1.0;
-    font-weight:800;
+    /* SALES QUOTATION title */
+    .quote-right-title {
+      background:#d0d4d9;
+      text-align:right;
+      padding:0.2rem 1rem;
+      border-radius:4px;
+      margin-bottom:1rem;            /* fixed: was '1.0' with no unit */
+      font-weight:800;
     }
     
     /* 4‑column grid: label, value, label, value */
@@ -150,7 +150,7 @@
 
     /* Quote Builder */
     #quoteBuilder {
-      margin-top:0;
+      margin-top:1.5rem;
       padding:1.5rem;
       background:#f9fafc;
       border:1px solid #ddd;
@@ -242,60 +242,76 @@
   </div>
 
   <!-- QUOTE BUILDER -->
-<div id="quoteBuilder">
-  <h3>Quote Builder</h3>
-  <table class="quote-table">
-    <thead>
-      <tr>
-        <th>Item</th>
-        <th>Cat / Material No.</th>
-        <th>Description</th>
-        <th>Country of Origin / HSN Code</th>
-        <th>Quantity</th>
-        <th>Unit Price (INR)</th>
-        <th>Total Price (INR)</th>
-      </tr>
-    </thead>
-    <tbody id="quoteBuilderBody">
-      <!-- Populated dynamically -->
-    </tbody>
-  </table>
+  <div id="quoteBuilder">
+    <h3>Quote Builder</h3>
+
+    <!-- Optional: multi‑instrument selection area (used by generateQuote) -->
+    <div id="instrumentSelection" style="margin-bottom:1rem;"></div>
+
+    <!-- Optional controls used by generateQuote() -->
+    <div style="margin-bottom:0.5rem;">
+      <label>Special Discount (₹): </label>
+      <input type="number" id="discount" value="0" style="width:120px;">
+    </div>
+    <div style="margin-bottom:0.5rem;">
+      <label>Freight Costs: </label>
+      <input type="text" id="freight" value="Included" style="width:150px;">
+    </div>
+
+    <table class="quote-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Cat / Material No.</th>
+          <th>Description</th>
+          <th>Country of Origin / HSN Code</th>
+          <th>Quantity</th>
+          <th>Unit Price (INR)</th>
+          <th>Total Price (INR)</th>
+        </tr>
+      </thead>
+      <tbody id="quoteBuilderBody">
+        <!-- Populated dynamically from selectedInstrument -->
+      </tbody>
+    </table>
+
+    <!-- Summary from generateQuote() -->
+    <div id="quoteSummary"></div>
+  </div>
 </div>
 
-
 <script>
-
   function populateQuoteBuilderFromInstrument() {
-  const header = JSON.parse(localStorage.getItem('quoteHeader') || '{}');
-  const instruments = JSON.parse(localStorage.getItem('instruments') || '[]');
-  const selected = header.selectedInstrument;
+    const header = JSON.parse(localStorage.getItem('quoteHeader') || '{}');
+    const selected = header.selectedInstrument;
+    if (!selected) return;
 
-  if (!selected) return;
+    const row = `
+      <tr>
+        <td>${selected.instrumentCode || ''}</td>
+        <td>${selected.materialNo || '—'}</td>
+        <td>${selected.description || ''}</td>
+        <td>${selected.origin || '—'} / ${selected.hsnCode || '—'}</td>
+        <td><input type="number" value="1" min="1" id="qtyInput"></td>
+        <td><input type="text" value="${selected.unitPrice || ''}" id="unitPriceInput"></td>
+        <td><input type="text" value="${selected.unitPrice || ''}" id="totalPriceInput"></td>
+      </tr>
+    `;
 
-  const row = `
-    <tr>
-      <td>${selected.instrumentCode}</td>
-      <td>${selected.materialNo || '—'}</td>
-      <td>${selected.description}</td>
-      <td>${selected.origin || '—'} / ${selected.hsnCode || '—'}</td>
-      <td><input type="number" value="1" min="1" id="qtyInput"></td>
-      <td><input type="text" value="${selected.unitPrice}" id="unitPriceInput"></td>
-      <td><input type="text" value="${selected.unitPrice}" id="totalPriceInput"></td>
-    </tr>
-  `;
+    document.getElementById('quoteBuilderBody').innerHTML = row;
 
-  document.getElementById('quoteBuilderBody').innerHTML = row;
+    const qtyInput = document.getElementById('qtyInput');
+    const unitInput = document.getElementById('unitPriceInput');
 
-  // Auto-update total price on quantity or unit price change
-  document.getElementById('qtyInput').addEventListener('input', updateTotal);
-  document.getElementById('unitPriceInput').addEventListener('input', updateTotal);
+    qtyInput.addEventListener('input', updateTotal);
+    unitInput.addEventListener('input', updateTotal);
 
-  function updateTotal() {
-    const qty = parseFloat(document.getElementById('qtyInput').value) || 0;
-    const unit = parseFloat(document.getElementById('unitPriceInput').value) || 0;
-    document.getElementById('totalPriceInput').value = (qty * unit).toFixed(2);
+    function updateTotal() {
+      const qty = parseFloat(qtyInput.value) || 0;
+      const unit = parseFloat(unitInput.value) || 0;
+      document.getElementById('totalPriceInput').value = (qty * unit).toFixed(2);
+    }
   }
-}
 
   function formatISOToDMY(iso) {
     if (!iso) return '';
@@ -339,6 +355,7 @@
 
   function renderInstrumentSelection() {
     const container = document.getElementById('instrumentSelection');
+    if (!container) return;
     container.innerHTML = '';
     if (!instruments.length) {
       container.innerHTML = '<p style="color:#999;">No instruments found. Please add instruments first.</p>';
@@ -493,7 +510,6 @@
   populateHeader();
   renderInstrumentSelection();
   populateQuoteBuilderFromInstrument();
-
 </script>
 </body>
 </html>
