@@ -80,29 +80,40 @@
       margin-bottom: 1rem;
       letter-spacing: 0.05em;
     }
+  
+   <div class="attn-box" style="
+    margin-top:4rem; /* increased from 1rem to 4rem */
+    background:#e0f0ff;
+    padding:0.75rem 1rem;
+    border-radius:8px;
+    font-weight:600;
+    color:#0d6efd;
+  ">
+    KIND ATTN: <span id="toAttn"></span>
+  </div>
   </style>
 </head>
-<body>
-<header>QMS - Quotes</header>
-
-<div class="container">
-  <!-- QUOTE HEADER BLOCK -->
-  <div class="quote-header">
-    <div class="quote-header-body">
-      <!-- LEFT SIDE -->
-      <div class="quote-left">
-        <div class="company-box">
-          <p><strong>ISTOS Medical Pvt Ltd.</strong> #51/5, 2nd Cross, J.C. Ind Area, Bikasipura Main Road, Yelachenahalli, Bangalore - 560062</p>
+  <body>
+  <header>QMS - Quotes</header>
+  
+  <div class="container">
+    <!-- QUOTE HEADER BLOCK -->
+    <div class="quote-header">
+      <div class="quote-header-body">
+        <!-- LEFT SIDE -->
+        <div class="quote-left">
+          <div class="company-box">
+            <p><strong>ISTOS Medical Pvt Ltd.</strong> #51/5, 2nd Cross, J.C. Ind Area, Bikasipura Main Road, Yelachenahalli, Bangalore - 560062</p>
+          </div>
+          <div class="hospital-box">
+            <p><strong>To:</strong><br>
+            <span id="toHospitalName">Hospital / Client Name</span><br>
+            <span id="toHospitalAddress">Hospital Address</span></p>
+          </div>
+          <div class="attn-box" style="margin-top:1rem; background:#e0f0ff; padding:0.75rem 1rem; border-radius:8px; font-weight:600; color:#0d6efd;">
+            KIND ATTN: <span id="toAttn"></span>
+          </div>
         </div>
-        <div class="hospital-box">
-          <p><strong>To:</strong><br>
-          <span id="toHospitalName">Hospital / Client Name</span><br>
-          <span id="toHospitalAddress">Hospital Address</span></p>
-        </div>
-        <div class="attn-box" style="margin-top:1rem; background:#e0f0ff; padding:0.75rem 1rem; border-radius:8px; font-weight:600; color:#0d6efd;">
-          KIND ATTN: <span id="toAttn">Purchase Department</span>
-        </div>
-      </div>
 
       <!-- RIGHT SIDE -->
       <div class="quote-right">
