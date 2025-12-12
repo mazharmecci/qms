@@ -13,10 +13,8 @@
     .quote-header-top { display:flex; justify-content:flex-end; margin-bottom:1rem; }
     .logo-box img { height:60px; object-fit:contain; }
     .quote-header-body { display:flex; gap:2rem; flex-wrap:wrap; }
-    .quote-left { flex:1; min-width:300px; }
-    .quote-right { flex:1; min-width:300px; background:#f0f0f0; padding:1rem 1.25rem; border-radius:8px; }
-    .company-box { background:#e9ecef; padding:0.6rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .quote-right-title { text-align:right; font-weight:700; font-size:1rem; margin-bottom:0.75rem; letter-spacing:0.05em; }
+    .quote-left { flex:1; min-width:300px; }    
+    .company-box { background:#e9ecef; padding:0.6rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }    
     .quote-meta-grid { display:grid; grid-template-columns:1fr auto; gap:0.35rem 1rem; align-items:center; }
     .quote-meta-grid .label { font-size:0.8rem; font-weight:600; color:#222; }
     .quote-meta-grid .value { font-size:0.8rem; color:#000; text-align:right; white-space:nowrap; }
@@ -34,6 +32,25 @@
     overflow: hidden;             /* Hide overflow */
     text-overflow: ellipsis;      /* Add "..." if clipped */
     margin: 0;
+  }
+
+   .quote-right {
+    flex: 1;
+    min-width: 300px;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    background: #fff; /* white background for metadata block */
+  }
+
+   .quote-right-title {
+    background: #f0f0f0; /* grey tint only for title */
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    letter-spacing: 0.05em;
   }
   </style>
 </head>
