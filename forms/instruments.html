@@ -15,14 +15,41 @@
       margin: 0;
       padding: 0;
     }
+
     header {
       background: #0d6efd;
       color: white;
-      padding: 1rem 2rem;
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: 600;
+      padding: 0.75rem 1.5rem;
     }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: #ffffff;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+
     .container {
       max-width: 1200px;
       margin: 2rem auto;
@@ -49,6 +76,7 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     form {
       display: none;
       grid-template-columns: 1fr 1fr;
@@ -67,6 +95,7 @@
       border-radius: 8px;
       font-size: 0.95rem;
     }
+
     #detailsEditor {
       grid-column: span 2;
       height: 150px;
@@ -74,6 +103,7 @@
       border: 1px solid #ccc;
       border-radius: 8px;
     }
+
     form button[type="submit"] {
       grid-column: span 2;
       background: #0d6efd;
@@ -81,6 +111,7 @@
       border: none;
       cursor: pointer;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -97,6 +128,7 @@
       background: #f0f4f8;
       color: #333;
     }
+
     .actions button {
       margin-right: 0.5rem;
       padding: 0.4rem 0.8rem;
@@ -113,6 +145,7 @@
       background: #dc3545;
       color: white;
     }
+
     .pagination {
       margin-top: 1rem;
       text-align: center;
@@ -129,7 +162,15 @@
   </style>
 </head>
 <body>
-  <header>QMS - Instruments</header>
+  <!-- Single header with Back button -->
+  <header>
+    <div class="header-inner">
+      <button type="button" class="back-btn" onclick="goBack()">
+        ← Back
+      </button>
+      <div class="header-title">QMS - Instruments</div>
+    </div>
+  </header>
 
   <div class="container">
     <div class="top-bar">
@@ -319,13 +360,21 @@
     function deleteInstrument(index) {
       instruments.splice(index, 1);
 
-      // If we delete the last item on the current page, step back a page when needed
       const maxPage = Math.max(1, Math.ceil(instruments.length / pageSize));
       if (currentPage > maxPage) {
         currentPage = maxPage;
       }
 
       renderTable();
+    }
+
+    function goBack() {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        // Optional: fallback
+        // window.location.href = 'index.html';
+      }
     }
 
     // Initial render
