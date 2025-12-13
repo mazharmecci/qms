@@ -44,7 +44,21 @@
     .details-content, .optional-content, .config-content { display:none; font-size:0.9rem; margin-top:0.5rem; }
     .price-cell { font-weight:600; white-space:nowrap; }
 
-    .modal { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.2); z-index:1000; width:650px; }
+    .modal {
+      display:none;
+      position:fixed;
+      top:5%;
+      left:50%;
+      transform:translateX(-50%);
+      background:#fff;
+      padding:2rem;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      z-index:1000;
+      width:800px;
+      max-height:90vh;
+      overflow-y:auto;
+    }
     .modal h3 { margin-bottom:1rem; }
     .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
     .modal input, .modal select, .modal textarea {
@@ -141,7 +155,6 @@
     <input type="text" id="optItemId" placeholder="Item ID">
     <input type="text" id="optItemCode" placeholder="Item Code">
 
-    <!-- multiline item name / description -->
     <textarea id="optItemName" rows="4"
       placeholder="First line = item name&#10;Next lines = sub details, each on its own line"></textarea>
 
@@ -150,9 +163,12 @@
     <input type="text" id="optOrigin" placeholder="Country Of Origin">
     <input type="text" id="optPrice" placeholder="Unit Price (₹)">
   </div>
+
+  <div id="optionalMasterList" style="grid-column:span 2; margin-top:1rem; border-top:1px solid #eee; padding-top:0.5rem; font-size:0.85rem;"></div>
+
   <div class="modal-actions">
     <button class="save-btn" onclick="saveOptionalItem()">Save</button>
-    <button onclick="closeOptionalModal()">Cancel</button>
+    <button onclick="closeOptionalModal()">Close</button>
   </div>
 </div>
 
@@ -169,7 +185,6 @@
     <input type="text" id="cfgItemId" placeholder="Item ID">
     <input type="text" id="cfgItemCode" placeholder="Item Code">
 
-    <!-- multiline item name / description -->
     <textarea id="cfgItemName" rows="4"
       placeholder="First line = item name&#10;Next lines = sub details, each on its own line"></textarea>
 
@@ -180,9 +195,12 @@
     <input type="text" id="cfgUP" placeholder="UP-INR" value="Included">
     <input type="text" id="cfgTP" placeholder="TP-INR" value="Included">
   </div>
+
+  <div id="configMasterList" style="grid-column:span 2; margin-top:1rem; border-top:1px solid #eee; padding-top:0.5rem; font-size:0.85rem;"></div>
+
   <div class="modal-actions">
     <button class="save-btn" onclick="saveConfigItem()">Save</button>
-    <button onclick="closeConfigModal()">Cancel</button>
+    <button onclick="closeConfigModal()">Close</button>
   </div>
 </div>
 
@@ -195,6 +213,10 @@
   const additionalSelect = document.getElementById('additional');
   const configurationSelect = document.getElementById('configuration');
   const detailsInput = document.getElementById('detailsInput');
+
+  const optHSNInput = document.getElementById('optHSN');
+  const optPriceInput = document.getElementById('optPrice');
+  const cfgHSNInput = document.getElementById('cfgHSN');
 
   let instruments = JSON.parse(localStorage.getItem('instruments') || '[]');
   let currentPage = 1;
@@ -224,7 +246,7 @@
     return digits ? parseInt(digits,10) : 0;
   }
 
-  // instrument details: first line header, others bullets
+  // Instrument details: first line header, rest bullets
   function buildDetailsHTML(rawText) {
     const lines = rawText
       .split('\n')
@@ -281,7 +303,71 @@
     );
   }
 
-  /* OPTIONAL MODAL */
+  /* OPTIONAL MASTER LIST RENDER + DELETE */
+
+  function renderOptionalMasterList() {
+    const container = document.getElementById('optionalMasterList');
+    const master = getAdditionalItemMaster();
+    if (!container) return;
+    if (!master.length) {
+      container.innerHTML = '<em>No optional items saved yet.</em>';
+      return;
+    }
+    container.innerHTML = master.map((item, idx) => {
+      const firstLine = (item.name || '').split('\n')[0] || '';
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span>${item.code || ''} - ${firstLine}</span>
+          <button type="button"
+            style="background:#dc3545; color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:0.75rem;"
+            onclick="deleteOptionalMasterItem(${idx})">Delete</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function deleteOptionalMasterItem(index) {
+    const master = getAdditionalItemMaster();
+    if (index < 0 || index >= master.length) return;
+    master.splice(index, 1);
+    localStorage.setItem('additionalItemMaster', JSON.stringify(master));[web:94]
+    renderOptionalMasterList();
+    populateExistingAdditionalDropdown();
+  }
+
+  /* CONFIG MASTER LIST RENDER + DELETE */
+
+  function renderConfigMasterList() {
+    const container = document.getElementById('configMasterList');
+    const master = getConfigItemMaster();
+    if (!container) return;
+    if (!master.length) {
+      container.innerHTML = '<em>No configuration items saved yet.</em>';
+      return;
+    }
+    container.innerHTML = master.map((item, idx) => {
+      const firstLine = (item.name || '').split('\n')[0] || '';
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span>${item.code || ''} - ${firstLine}</span>
+          <button type="button"
+            style="background:#dc3545; color:#fff; border:none; border-radius:4px; padding:2px 6px; font-size:0.75rem;"
+            onclick="deleteConfigMasterItem(${idx})">Delete</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function deleteConfigMasterItem(index) {
+    const master = getConfigItemMaster();
+    if (index < 0 || index >= master.length) return;
+    master.splice(index, 1);
+    localStorage.setItem('configItemMaster', JSON.stringify(master));[web:94]
+    renderConfigMasterList();
+    populateExistingConfigDropdown();
+  }
+
+  /* OPTIONAL MODAL WORKFLOW */
 
   additionalSelect.addEventListener('change', function(){
     if(this.value==='Yes') openOptionalModal();
@@ -289,19 +375,18 @@
 
   function openOptionalModal() {
     populateExistingAdditionalDropdown();
+    renderOptionalMasterList();
     document.getElementById('optionalItemModal').style.display='block';
   }
   function closeOptionalModal(){
     document.getElementById('optionalItemModal').style.display='none';
   }
 
-  const optHSNInput = document.getElementById('optHSN');
   optHSNInput.addEventListener('input', ()=>{
     let d = optHSNInput.value.replace(/\D/g,'').slice(0,8);
     if(d.length>4) d = d.slice(0,4)+' '+d.slice(4);
     optHSNInput.value = d;
   });
-  const optPriceInput = document.getElementById('optPrice');
   optPriceInput.addEventListener('input', function(){
     let raw = this.value.replace(/[^\d]/g,'');
     this.value = raw ? '₹ '+parseFloat(raw).toLocaleString('en-IN') : '';
@@ -344,7 +429,7 @@
     const newItem = {
       id:    document.getElementById('optItemId').value,
       code:  document.getElementById('optItemCode').value,
-      name:  document.getElementById('optItemName').value, // multiline
+      name:  document.getElementById('optItemName').value,
       catalog: document.getElementById('optCatalogRef').value,
       hsn,
       origin: document.getElementById('optOrigin').value,
@@ -357,10 +442,20 @@
       saveAdditionalItemToMaster(newItem);
     }
 
-    closeOptionalModal();
+    // clear fields for next entry, keep modal open
+    document.getElementById('optItemId').value = '';
+    document.getElementById('optItemCode').value = '';
+    document.getElementById('optItemName').value = '';
+    document.getElementById('optCatalogRef').value = '';
+    document.getElementById('optHSN').value = '';
+    document.getElementById('optOrigin').value = '';
+    document.getElementById('optPrice').value = '';
+
+    populateExistingAdditionalDropdown();
+    renderOptionalMasterList();
   }
 
-  /* CONFIG MODAL */
+  /* CONFIG MODAL WORKFLOW */
 
   configurationSelect.addEventListener('change', function(){
     if(this.value==='Yes') openConfigModal();
@@ -368,13 +463,13 @@
 
   function openConfigModal(){
     populateExistingConfigDropdown();
+    renderConfigMasterList();
     document.getElementById('configItemModal').style.display='block';
   }
   function closeConfigModal(){
     document.getElementById('configItemModal').style.display='none';
   }
 
-  const cfgHSNInput = document.getElementById('cfgHSN');
   cfgHSNInput.addEventListener('input', ()=>{
     let d = cfgHSNInput.value.replace(/\D/g,'').slice(0,8);
     if(d.length>4) d = d.slice(0,4)+' '+d.slice(4);
@@ -424,7 +519,7 @@
     const newItem = {
       id:    document.getElementById('cfgItemId').value,
       code:  document.getElementById('cfgItemCode').value,
-      name:  document.getElementById('cfgItemName').value, // multiline
+      name:  document.getElementById('cfgItemName').value,
       catalog: document.getElementById('cfgCatalogRef').value,
       hsn,
       origin: document.getElementById('cfgOrigin').value,
@@ -439,7 +534,19 @@
       saveConfigItemToMaster(newItem);
     }
 
-    closeConfigModal();
+    // clear fields for next entry, keep modal open
+    document.getElementById('cfgItemId').value = '';
+    document.getElementById('cfgItemCode').value = '';
+    document.getElementById('cfgItemName').value = '';
+    document.getElementById('cfgCatalogRef').value = '';
+    document.getElementById('cfgHSN').value = '';
+    document.getElementById('cfgOrigin').value = '';
+    qtyInput.value = 'Included';
+    upInput.value = 'Included';
+    tpInput.value = 'Included';
+
+    populateExistingConfigDropdown();
+    renderConfigMasterList();
   }
 
   /* MAIN FORM SAVE */
@@ -468,7 +575,7 @@
     } else {
       instruments.push(instrument);
     }
-    localStorage.setItem('instruments', JSON.stringify(instruments));
+    localStorage.setItem('instruments', JSON.stringify(instruments));[web:88]
     form.reset(); unitPriceInput.value='';
     optionalItems=[]; configurationItems=[];
     form.classList.remove('active');
@@ -572,7 +679,7 @@
     unitPriceInput.value=formatPriceDisplay(inst.unitPrice);
     document.getElementById('gstType').value=inst.gstType||'';
     document.getElementById('gstPercent').value=inst.gstPercent||'';
-    detailsInput.value = ''; // raw text is not stored; you can enhance later if needed
+    detailsInput.value = ''; // raw text not stored; can be enhanced if needed
 
     optionalItems = inst.optionalItems ? [...inst.optionalItems]:[];
     configurationItems = inst.configurationItems ? [...inst.configurationItems]:[];
